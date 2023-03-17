@@ -1,34 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>对话程序</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body>
-    <div id="chat-box">
-        <ul id="chat-messages"></ul>
-    </div>
-    <form id="message-form">
-        <input type="text" name="message" id="message-input" placeholder="输入你的消息" autocomplete="off">
-        <button type="submit">发送</button>
-    </form>
 
-    <script>
-        $('#message-form').on('submit', function (event) {
-            event.preventDefault();
-            const message = $('#message-input').val();
-            $('#message-input').val('');
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>对话程序</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+        <style>
+            pre {
+                white-space: pre-wrap;
+                word-wrap: break-word;
+            }
+        </style>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    </head>
 
-            const userMessage = $('<li>').text('用户: ' + message);
-            $('#chat-messages').append(userMessage);
+    <body>
+        <div id="chat-box">
+            <ul id="chat-messages"></ul>
+        </div>
+        <form id="message-form">
+            <input type="text" name="message" id="message-input" placeholder="输入你的消息" autocomplete="off">
+            <button type="submit">发送</button>
+        </form>
 
-            $.post('/send_message', { message: message }, function (response) {
-                const responseMessage = $('<li>').text('机器人: ' + response);
-                $('#chat-messages').append(responseMessage);
+        <script>
+            $('#message-form').on('submit', function (event) {
+                event.preventDefault();
+                const message = $('#message-input').val();
+                $('#message-input').val('');
+
+                const userMessage = $('<li>').text('用户: ' + message);
+                $('#chat-messages').append(userMessage);
+
+                $.post('/send_message', { message: message }, function (response) {
+                    const responseMessage = $('<li>').html('<pre><code class="language-python">机器人: ' + response + '</code></pre>');
+                    $('#chat-messages').append(responseMessage);
+                    $('pre code').each(function (i, block) {
+                        hljs.highlightBlock(block);
+                    });
+                });
             });
-        });
-    </script>
-</body>
+
+            $(document).ready(function () {
+                const apiKey = prompt('请输入您的API密钥:');
+                $.post('/set_api_key', { api_key: apiKey });
+            });
+
+        </script>
+    </body>
+
 </html>
